@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Piedra, Papel o Tijera 3D</title>
+  <meta name="description" content="Juego de Piedra, Papel o Tijera en 3D con modo contra la CPU y multijugador en tiempo real.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✊</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.js",
+        "three/addons/": "./vendor/three/addons/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="scene"></div>
+
+  <!-- Menú principal -->
+  <section id="menu" class="screen active" aria-label="Menú principal">
+    <div class="panel menu-panel">
+      <h1 class="title"><span>Piedra,</span> <span>Papel</span> <span>o Tijera</span></h1>
+      <p class="subtitle">Duelo de oficina en 3D</p>
+
+      <label class="field">
+        <span>Tu nombre</span>
+        <input id="name" maxlength="16" autocomplete="nickname" placeholder="Ej: Ana" spellcheck="false">
+      </label>
+
+      <button id="btn-ranked" class="btn primary ranked">🏆 Competitivo</button>
+      <button id="btn-pve" class="btn">🤖 Jugar contra la CPU</button>
+      <p id="profile-line" class="muted small profile-line"></p>
+
+      <div class="divider"><span>Multijugador</span></div>
+      <button id="btn-create" class="btn">➕ Crear sala</button>
+      <div class="join-row">
+        <input id="code" maxlength="6" placeholder="CÓDIGO" autocomplete="off" spellcheck="false" aria-label="Código de sala">
+        <button id="btn-join" class="btn">Unirse</button>
+      </div>
+      <p id="menu-error" class="error" role="alert"></p>
+      <div class="links">
+        <button id="btn-leaderboard" class="link">📊 Ranking</button>
+        <button id="btn-settings" class="link">🎉 Celebraciones</button>
+        <button id="btn-history" class="link">📜 Historial</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sala de espera PvP -->
+  <section id="lobby" class="screen" aria-label="Sala de espera">
+    <div class="panel lobby-panel">
+      <p class="muted">Código de la sala</p>
+      <button id="room-code" class="room-code" title="Copiar código">------</button>
+      <p class="muted small">Compartí este código con tu rival para que se una</p>
+      <ul id="lobby-players" class="players"></ul>
+      <p class="waiting"><span class="dot"></span><span class="dot"></span><span class="dot"></span> Esperando oponente</p>
+      <button class="btn danger leave">Abandonar</button>
+    </div>
+  </section>
+
+  <!-- Cola competitiva -->
+  <section id="queue" class="screen" aria-label="Buscando rival">
+    <div class="panel lobby-panel">
+      <div class="radar"><span></span><span></span><span></span></div>
+      <h2 class="queue-title">Buscando rival…</h2>
+      <p class="queue-time" id="queue-time">0:00</p>
+      <p class="muted" id="queue-info">Tus victorias: 0</p>
+      <p class="muted small" id="queue-range">Rango de emparejamiento: ±1 victoria</p>
+      <button class="btn danger" id="btn-cancel-queue">Cancelar búsqueda</button>
+    </div>
+  </section>
+
+  <!-- Resultado de partida competitiva -->
+  <section id="match-result" class="screen" aria-label="Resultado de la partida">
+    <div class="panel lobby-panel match-panel">
+      <p class="muted small">Partida clasificatoria</p>
+      <h2 id="mr-title" class="mr-title">¡Victoria!</h2>
+      <p id="mr-detail" class="muted">2 - 1</p>
+      <div class="mr-stats">
+        <div><span id="mr-wins">0</span><small>Victorias</small></div>
+        <div><span id="mr-losses">0</span><small>Derrotas</small></div>
+        <div><span id="mr-position">—</span><small>Puesto global</small></div>
+      </div>
+      <p id="mr-note" class="small note-warn"></p>
+      <div class="mr-actions">
+        <button class="btn primary" id="btn-requeue">🔁 Buscar otra</button>
+        <button class="btn" id="btn-mr-ranking">📊 Ranking</button>
+        <button class="btn" id="btn-mr-menu">Menú</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Leaderboard -->
+  <section id="leaderboard" class="screen" aria-label="Ranking global">
+    <div class="panel lb-panel">
+      <header class="lb-head">
+        <div>
+          <h2>Ranking global</h2>
+          <p class="muted small">Top 100 por victorias en modo competitivo. Las derrotas son informativas: no restan puntos. Las partidas contra la CPU y las salas privadas no cuentan.</p>
+        </div>
+        <button class="btn" id="btn-lb-close">✖</button>
+      </header>
+      <div class="lb-scroll" id="lb-scroll">
+        <table class="lb-table">
+          <thead><tr><th>#</th><th>Jugador</th><th>Victorias</th><th class="muted">Derrotas</th></tr></thead>
+          <tbody id="lb-body"></tbody>
+        </table>
+      </div>
+      <div class="lb-me" id="lb-me"></div>
+    </div>
+  </section>
+
+  <!-- HUD de partida -->
+  <section id="hud" class="screen" aria-label="Partida">
+    <header class="scorebar">
+      <div class="player-card me">
+        <span class="shirt" id="me-shirt"></span>
+        <span class="pname" id="me-name">Vos</span>
+        <span class="pscore" id="me-score">0</span>
+      </div>
+      <div class="round-info">
+        <span id="round-label">Ronda 1</span>
+        <span id="draws-label" class="muted small">Empates: 0</span>
+        <span id="room-label" class="muted small"></span>
+        <span id="bo3" class="bo3"></span>
+      </div>
+      <div class="player-card opp">
+        <span class="pscore" id="opp-score">0</span>
+        <span class="pname" id="opp-name">CPU</span>
+        <span class="shirt" id="opp-shirt"></span>
+      </div>
+    </header>
+    <button class="btn danger leave top-leave">✖ Abandonar</button>
+
+    <div id="chant" class="chant" aria-live="polite"></div>
+    <div id="result" class="result" aria-live="polite"></div>
+
+    <footer class="moves">
+      <p id="status" class="status">Elegí tu jugada</p>
+      <div class="move-buttons">
+        <button class="move" data-move="ROCK"><span class="emoji">✊</span><span>Piedra</span></button>
+        <button class="move" data-move="PAPER"><span class="emoji">✋</span><span>Papel</span></button>
+        <button class="move" data-move="SCISSORS"><span class="emoji">✌️</span><span>Tijera</span></button>
+      </div>
+    </footer>
+  </section>
+
+  <!-- Configuración: celebraciones -->
+  <dialog id="settings-dialog">
+    <h2>🎉 Celebraciones de victoria</h2>
+    <p class="muted small">Elegí la animación que hace tu mano sobre el escritorio cuando ganás. Tu rival también la ve en las partidas multijugador.</p>
+    <div class="celebrations" id="celebrations"></div>
+    <div class="dialog-actions">
+      <button class="btn" id="btn-preview">👀 Vista previa 3D</button>
+      <button class="btn primary" id="btn-settings-save">Guardar</button>
+    </div>
+  </dialog>
+
+  <!-- Historial -->
+  <dialog id="history-dialog">
+    <h2>Últimas partidas</h2>
+    <table>
+      <thead><tr><th>Modo</th><th>Jugador A</th><th></th><th>Jugador B</th><th>Ganador</th></tr></thead>
+      <tbody id="history-body"></tbody>
+    </table>
+    <form method="dialog"><button class="btn">Cerrar</button></form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+  <div id="env-badge" class="env-badge" title="Ambiente y versión desplegada"></div>
+  <div id="loading" class="loading">Cargando oficina…</div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

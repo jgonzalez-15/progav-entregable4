@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Entregable 4 - CI/CD - Informe</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+  :root { --ink:#1f2328; --muted:#57606a; --accent:#c4501b; --accent2:#f08a3c; --line:#d0d7de; --soft:#f6f8fa; --ok:#1a7f37; --warn:#9a6700; --bad:#cf222e; }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter", "Segoe UI", "DejaVu Sans", Arial, sans-serif; color: var(--ink); font-size: 10.3pt; line-height: 1.5; margin: 0; }
+  h1, h2, h3 { line-height: 1.2; color: #111; }
+  h1 { font-size: 20pt; margin: 0 0 6mm; }
+  h2 { font-size: 15pt; margin: 9mm 0 3mm; padding-bottom: 2mm; border-bottom: 2px solid var(--accent2); break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 5mm 0 2mm; break-after: avoid; }
+  p { margin: 0 0 2.6mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+  li { margin-bottom: 1mm; }
+  code, pre { font-family: "JetBrains Mono", "DejaVu Sans Mono", Consolas, monospace; font-size: 8.6pt; }
+  code { background: var(--soft); padding: 0.3mm 1.2mm; border-radius: 3px; }
+  pre { background: #0f172a; color: #e2e8f0; padding: 3mm 4mm; border-radius: 4px; white-space: pre-wrap; word-break: break-word; margin: 0 0 3mm; break-inside: avoid; }
+  pre code { background: none; padding: 0; color: inherit; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 4mm; font-size: 9.2pt; break-inside: auto; }
+  th, td { border: 1px solid var(--line); padding: 1.6mm 2.2mm; text-align: left; vertical-align: top; }
+  th { background: var(--soft); font-weight: 700; }
+  tr { break-inside: avoid; }
+  figure { margin: 3mm 0 5mm; break-inside: avoid; text-align: center; }
+  figure img, figure svg { max-width: 100%; border: 1px solid var(--line); border-radius: 4px; }
+  figcaption { font-size: 8.8pt; color: var(--muted); margin-top: 1.5mm; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .grid2 figure { margin: 0; }
+  .note { border-left: 3px solid var(--accent2); background: #fff7ed; padding: 2.5mm 3.5mm; margin: 0 0 4mm; break-inside: avoid; }
+  .tag { display: inline-block; font-size: 7.8pt; font-weight: 700; padding: 0.3mm 1.6mm; border-radius: 3px; white-space: nowrap; }
+  .tag.obs { background: #dafbe1; color: var(--ok); }
+  .tag.prev { background: #fff8c5; color: var(--warn); }
+  .pagebreak { break-before: page; }
+  .toc ol { columns: 2; column-gap: 10mm; }
+
+  /* Carátula */
+  .cover { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .cover .top { font-size: 10pt; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+  .cover h1 { font-size: 30pt; margin: 0; }
+  .cover .sub { font-size: 15pt; color: var(--accent); margin-top: 3mm; font-weight: 600; }
+  .cover .hero { width: 100%; border-radius: 6px; border: 1px solid var(--line); }
+  .cover table { width: auto; min-width: 60%; }
+  .cover td { border: none; padding: 1mm 4mm 1mm 0; }
+  .cover td:first-child { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- ===================== CARÁTULA ===================== -->
+<section class="cover">
+  <div>
+    <div class="top">Universidad de Montevideo · Programación Avanzada · Curso 2026</div>
+    <h1 style="margin-top:14mm">Entregable 4 — CI/CD</h1>
+    <div class="sub">Piedra, Papel o Tijera 3D con pipeline de Jenkins, ambiente UAT y aprobación manual a producción</div>
+  </div>
+  <img class="hero" src="../img/pvp-resultado.png" alt="Partida multijugador en la oficina 3D">
+  <table>
+    <tr><td>Integrantes</td><td>[Nombre Apellido 1] · [Nombre Apellido 2] · [Nombre Apellido 3]</td></tr>
+    <tr><td>Grupo</td><td>[Lunes y Viernes / Martes y Miércoles]</td></tr>
+    <tr><td>Docente</td><td>[Nombre del docente]</td></tr>
+    <tr><td>Repositorio</td><td>https://github.com/[OWNER]/piedra-papel-tijera-3d</td></tr>
+    <tr><td>Fecha</td><td>Noviembre 2026</td></tr>
+  </table>
+</section>
+
+<!-- ===================== ÍNDICE ===================== -->
+<section class="pagebreak toc">
+  <h1>Contenido</h1>
+  <ol>
+    <li>Resumen</li>
+    <li>Aplicación desarrollada</li>
+    <li>Arquitectura de la solución</li>
+    <li>Pipeline de CI/CD</li>
+    <li>Estrategia de pruebas</li>
+    <li>Decisiones técnicas y justificación</li>
+    <li>Anexo: ambiente UAT y aprobación manual</li>
+    <li>Instructivo de ejecución</li>
+    <li>Errores encontrados y solución</li>
+    <li>Conclusiones y dificultades</li>
+    <li>Apéndice: estructura del repositorio</li>
+  </ol>
+
+  <h2>1. Resumen</h2>
+  <p>Se desarrolló un juego web de <b>Piedra, Papel o Tijera</b> en 3D, con un modo contra un oponente virtual
+  aleatorio y un modo multijugador en tiempo real. La aplicación se compone de <b>tres módulos Maven</b>
+  (<code>game-core</code>, <code>rooms</code> y <code>web</code>) escritos en <b>Java 21 con Spring Boot 3.5</b>.
+  Tiene <b>74 pruebas unitarias</b> y <b>9 pruebas de integración</b>.</p>
+  <p>El ciclo de vida completo está automatizado con un <b>pipeline declarativo de Jenkins</b> versionado en el
+  repositorio (<code>Jenkinsfile</code>). El pipeline se dispara con cada push a GitHub (webhook) y hace lo siguiente:</p>
+  <ul>
+    <li>compila y ejecuta las pruebas;</li>
+    <li>construye una imagen Docker;</li>
+    <li>la despliega en un ambiente de <b>UAT</b> para pruebas manuales;</li>
+    <li><b>se detiene hasta que QA apruebe o rechace la versión desde la interfaz de Jenkins</b>;</li>
+    <li>solo con la aprobación, promueve <i>la misma imagen</i> a <b>Producción</b>, con smoke tests y rollback automático.</li>
+  </ul>
+  <p>Jenkins corre en Docker y se configura como código (JCasC + Job DSL). Así cualquier integrante
+  reproduce el entorno con un solo comando.</p>
+
+  <h2>2. Aplicación desarrollada</h2>
+  <p>La consigna aclara que el foco no es la funcionalidad sino el proceso de CI/CD. Aun así, se eligió una aplicación
+  que integra módulos con responsabilidades bien distintas (reglas, salas multijugador, web y persistencia), para que las
+  pruebas unitarias e integradas tengan sentido real:</p>
+  <ul>
+    <li><b>Modo PvE:</b> el jugador ingresa su nombre y juega contra la CPU, que elige al azar. Se lleva el marcador continuo
+      (rondas ganadas por cada uno y empates).</li>
+    <li><b>Modo PvP en tiempo real (WebSocket):</b> “Crear sala” genera un código de <b>6 letras</b> al estilo
+      <i>Among Us</i>. El rival lo ingresa para unirse. Cada jugador indica su nombre y recibe automáticamente un
+      <b>color de camiseta único</b> dentro de la sala. Las jugadas se revelan recién cuando ambos eligieron.</li>
+    <li><b>Abandonar</b> en cualquier momento vuelve a la pantalla de inicio. En PvP, el rival es notificado y vuelve a la sala de espera.</li>
+    <li><b>Escena 3D:</b> una oficina modelada de forma procedural a partir de la imagen de referencia, sin las personas.
+      Incluye escritorio, monitor con dunas, teclado, auriculares, vaso térmico, cuaderno, ventana al atardecer,
+      biblioteca, plantas y alfombra geométrica. En el menú la cámara gira lentamente sobre su eje. Durante la partida,
+      dos brazos (con la manga del color de cada jugador) agitan el puño al ritmo de “¡Piedra! ¡Papel! ¡Tijera!” y bajan
+      al escritorio mostrando la jugada.</li>
+    <li><b>Historial</b> de las últimas rondas, persistido en base de datos H2.</li>
+  </ul>
+  <div class="grid2">
+    <figure><img src="../img/menu.png"><figcaption>Fig. 1 — Menú: la cámara recorre la oficina (badge PROD con versión y commit).</figcaption></figure>
+    <figure><img src="../img/pve-ritmo.png"><figcaption>Fig. 2 — Sacudida de puños al ritmo del canto.</figcaption></figure>
+    <figure><img src="../img/pve-resultado.png"><figcaption>Fig. 3 — Revelación sobre el escritorio (papel contra papel).</figcaption></figure>
+    <figure><img src="../img/pvp-sala.png"><figcaption>Fig. 4 — Sala PvP con código de 6 letras y color asignado.</figcaption></figure>
+  </div>
+</section>
+
+<!-- ===================== ARQUITECTURA ===================== -->
+<section class="pagebreak">
+  <h2>3. Arquitectura de la solución</h2>
+  <h3>3.1 Módulos y componentes</h3>
+  <figure>
+  <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial" font-size="12">
+    <defs>
+      <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#57606a"/></marker>
+    </defs>
+    <rect x="0" y="0" width="760" height="400" fill="#fff"/>
+    <!-- navegador -->
+    <rect x="20" y="20" width="200" height="150" rx="8" fill="#fff7ed" stroke="#f08a3c"/>
+    <text x="120" y="42" text-anchor="middle" font-weight="bold">Navegador</text>
+    <text x="120" y="64" text-anchor="middle">index.html + CSS</text>
+    <text x="120" y="84" text-anchor="middle">main.js (pantallas, modos)</text>
+    <text x="120" y="104" text-anchor="middle">stage.js / office.js / arms.js</text>
+    <text x="120" y="124" text-anchor="middle">Three.js r187 (WebGL)</text>
+    <text x="120" y="144" text-anchor="middle">net.js (fetch + WebSocket)</text>
+    <!-- web module -->
+    <rect x="280" y="20" width="460" height="220" rx="8" fill="#eef6ff" stroke="#3e63dd"/>
+    <text x="510" y="42" text-anchor="middle" font-weight="bold">Módulo web — Spring Boot 3.5 (JAR ejecutable)</text>
+    <rect x="300" y="56" width="130" height="50" rx="5" fill="#fff" stroke="#3e63dd"/><text x="365" y="76" text-anchor="middle">PveController</text><text x="365" y="94" text-anchor="middle" font-size="10">REST /api/pve</text>
+    <rect x="445" y="56" width="140" height="50" rx="5" fill="#fff" stroke="#3e63dd"/><text x="515" y="76" text-anchor="middle">GameWebSocket</text><text x="515" y="94" text-anchor="middle" font-size="10">Handler /ws/game</text>
+    <rect x="600" y="56" width="125" height="50" rx="5" fill="#fff" stroke="#3e63dd"/><text x="662" y="76" text-anchor="middle">History / Info</text><text x="662" y="94" text-anchor="middle" font-size="10">/api/history /api/info</text>
+    <rect x="300" y="122" width="130" height="40" rx="5" fill="#fff" stroke="#3e63dd"/><text x="365" y="147" text-anchor="middle">PveService</text>
+    <rect x="600" y="122" width="125" height="40" rx="5" fill="#fff" stroke="#3e63dd"/><text x="662" y="147" text-anchor="middle">HistoryService</text>
+    <rect x="600" y="178" width="125" height="46" rx="5" fill="#fff" stroke="#3e63dd"/><text x="662" y="198" text-anchor="middle">JPA Repository</text><text x="662" y="215" text-anchor="middle" font-size="10">H2 en archivo</text>
+    <rect x="300" y="178" width="285" height="46" rx="5" fill="#fff" stroke="#3e63dd"/><text x="442" y="198" text-anchor="middle">GameConfig (beans) · Actuator /health</text><text x="442" y="215" text-anchor="middle" font-size="10">HousekeepingJob (limpieza de salas inactivas)</text>
+    <!-- rooms + core -->
+    <rect x="280" y="270" width="220" height="110" rx="8" fill="#ecfdf3" stroke="#30a46c"/>
+    <text x="390" y="292" text-anchor="middle" font-weight="bold">Módulo rooms (Java puro)</text>
+    <text x="390" y="314" text-anchor="middle">RoomManager · Room · Player</text>
+    <text x="390" y="334" text-anchor="middle">RandomRoomCodeGenerator (6 letras)</text>
+    <text x="390" y="354" text-anchor="middle">ColorAssigner · ShirtColor · PlayerNames</text>
+    <rect x="520" y="270" width="220" height="110" rx="8" fill="#f5f0ff" stroke="#8e4ec6"/>
+    <text x="630" y="292" text-anchor="middle" font-weight="bold">Módulo game-core (Java puro)</text>
+    <text x="630" y="314" text-anchor="middle">Move · Outcome · GameRules</text>
+    <text x="630" y="334" text-anchor="middle">MoveStrategy · RandomOpponent</text>
+    <text x="630" y="354" text-anchor="middle">Scoreboard</text>
+    <!-- flechas -->
+    <line x1="220" y1="70" x2="298" y2="80" stroke="#57606a" marker-end="url(#ar)"/><text x="232" y="62" font-size="10" fill="#57606a">HTTP JSON</text>
+    <line x1="220" y1="120" x2="443" y2="96" stroke="#57606a" marker-end="url(#ar)" stroke-dasharray="5 3"/><text x="300" y="118" font-size="10" fill="#57606a">WebSocket</text>
+    <line x1="365" y1="224" x2="365" y2="268" stroke="#57606a" marker-end="url(#ar)"/>
+    <line x1="515" y1="224" x2="515" y2="268" stroke="#57606a" marker-end="url(#ar)"/>
+    <line x1="500" y1="325" x2="518" y2="325" stroke="#57606a" marker-end="url(#ar)"/>
+    <line x1="430" y1="150" x2="560" y2="268" stroke="#57606a" marker-end="url(#ar)"/>
+    <text x="20" y="215" font-size="11" fill="#57606a">Dependencias Maven:</text>
+    <text x="20" y="233" font-size="11" fill="#57606a">web → rooms → game-core</text>
+    <text x="20" y="251" font-size="11" fill="#57606a">web → game-core</text>
+  </svg>
+  <figcaption>Fig. 5 — Componentes y dependencias entre módulos.</figcaption>
+  </figure>
+
+  <table>
+    <tr><th style="width:18%">Módulo</th><th>Responsabilidad</th><th style="width:22%">Pruebas</th></tr>
+    <tr><td><code>game-core</code></td><td>Reglas del juego (las 9 combinaciones), oponente virtual con generador inyectable y marcador. Sin dependencias externas.</td><td>34 unitarias (JUnit 5, parametrizadas)</td></tr>
+    <tr><td><code>rooms</code></td><td>Salas de 2 jugadores: código único de 6 letras (sin I/O para evitar confusiones), validación de nombres, colores de camiseta únicos por sala, resolución de rondas y marcador. Thread-safe (métodos sincronizados).</td><td>30 unitarias</td></tr>
+    <tr><td><code>web</code></td><td>Aplicación Spring Boot: API REST del modo PvE, WebSocket del modo PvP, historial con Spring Data JPA + H2, <i>health check</i> de Actuator, <code>/api/info</code> con ambiente y versión, y el frontend estático 3D.</td><td>10 unitarias (Mockito, <code>@WebMvcTest</code>) + 9 de integración</td></tr>
+  </table>
+
+  <h3>3.2 Protocolo de comunicación</h3>
+  <table>
+    <tr><th style="width:30%">Endpoint</th><th>Uso</th></tr>
+    <tr><td><code>POST /api/pve/sessions</code></td><td>Crea una partida PvE (nombre → id, colores de jugador y CPU).</td></tr>
+    <tr><td><code>POST /api/pve/sessions/{id}/rounds</code></td><td>Juega una ronda: el servidor elige la jugada de la CPU y devuelve el resultado y el marcador.</td></tr>
+    <tr><td><code>DELETE /api/pve/sessions/{id}</code></td><td>Abandonar la partida.</td></tr>
+    <tr><td><code>WS /ws/game</code></td><td>Cliente → servidor: <code>CREATE</code>, <code>JOIN</code>, <code>MOVE</code>, <code>LEAVE</code>.
+      Servidor → cliente: <code>JOINED</code>, <code>ROOM_STATE</code> (indica si el rival ya eligió, sin revelar la jugada),
+      <code>ROUND_RESULT</code>, <code>PLAYER_LEFT</code>, <code>ERROR</code>.</td></tr>
+    <tr><td><code>GET /api/history</code>, <code>GET /api/info</code>, <code>GET /actuator/health</code></td><td>Historial, ambiente/versión desplegada y salud. Los dos últimos los usan los smoke tests del pipeline.</td></tr>
+  </table>
+
+  <h3>3.3 Ambientes e infraestructura de CI/CD</h3>
+  <figure>
+  <svg viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial" font-size="12">
+    <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#57606a"/></marker></defs>
+    <rect width="760" height="330" fill="#fff"/>
+    <rect x="15" y="20" width="150" height="80" rx="8" fill="#f6f8fa" stroke="#57606a"/>
+    <text x="90" y="44" text-anchor="middle" font-weight="bold">PC desarrollador</text>
+    <text x="90" y="64" text-anchor="middle">DEV :8090</text>
+    <text x="90" y="84" text-anchor="middle" font-size="10">git push</text>
+    <rect x="15" y="140" width="150" height="70" rx="8" fill="#f6f8fa" stroke="#57606a"/>
+    <text x="90" y="166" text-anchor="middle" font-weight="bold">GitHub</text>
+    <text x="90" y="186" text-anchor="middle" font-size="10">repo + webhook (push)</text>
+    <rect x="15" y="250" width="150" height="60" rx="8" fill="#f6f8fa" stroke="#57606a"/>
+    <text x="90" y="274" text-anchor="middle" font-weight="bold">ngrok</text>
+    <text x="90" y="292" text-anchor="middle" font-size="10">https público → jenkins:8080</text>
+    <rect x="200" y="20" width="545" height="295" rx="10" fill="#fbfbfb" stroke="#1f2328" stroke-dasharray="6 4"/>
+    <text x="215" y="40" font-weight="bold">Docker (host del equipo) — red rps-net</text>
+    <rect x="220" y="55" width="230" height="240" rx="8" fill="#eef6ff" stroke="#3e63dd"/>
+    <text x="335" y="78" text-anchor="middle" font-weight="bold">rps-jenkins :8080</text>
+    <text x="335" y="100" text-anchor="middle" font-size="11">Jenkins LTS + JDK 21</text>
+    <text x="335" y="118" text-anchor="middle" font-size="11">JCasC + Job DSL + plugins</text>
+    <text x="335" y="136" text-anchor="middle" font-size="11">docker CLI → /var/run/docker.sock</text>
+    <text x="335" y="160" text-anchor="middle" font-size="11" font-weight="bold">Jenkinsfile:</text>
+    <text x="335" y="178" text-anchor="middle" font-size="10">Build · Unit · IT · Imagen</text>
+    <text x="335" y="194" text-anchor="middle" font-size="10">Deploy UAT + smoke</text>
+    <text x="335" y="210" text-anchor="middle" font-size="10">⏸ input: Aprobar / Rechazar</text>
+    <text x="335" y="226" text-anchor="middle" font-size="10">Deploy PROD + smoke / rollback</text>
+    <text x="335" y="256" text-anchor="middle" font-size="10" fill="#57606a">imágenes: rps3d:1.0.N,</text>
+    <text x="335" y="272" text-anchor="middle" font-size="10" fill="#57606a">uat/prod-current, *-previous</text>
+    <rect x="490" y="70" width="235" height="95" rx="8" fill="#fff8e1" stroke="#f5a700"/>
+    <text x="607" y="95" text-anchor="middle" font-weight="bold">rps-uat  (host :8081)</text>
+    <text x="607" y="117" text-anchor="middle" font-size="11">APP_ENV=UAT · volumen rps-data-uat</text>
+    <text x="607" y="137" text-anchor="middle" font-size="11">pruebas manuales de QA</text>
+    <rect x="490" y="195" width="235" height="95" rx="8" fill="#e9f8ef" stroke="#30a46c"/>
+    <text x="607" y="220" text-anchor="middle" font-weight="bold">rps-prod (host :8082)</text>
+    <text x="607" y="242" text-anchor="middle" font-size="11">APP_ENV=PROD · volumen rps-data-prod</text>
+    <text x="607" y="262" text-anchor="middle" font-size="11">misma imagen aprobada en UAT</text>
+    <line x1="90" y1="100" x2="90" y2="138" stroke="#57606a" marker-end="url(#a2)"/>
+    <line x1="90" y1="210" x2="90" y2="248" stroke="#57606a" marker-end="url(#a2)"/>
+    <line x1="165" y1="280" x2="218" y2="240" stroke="#57606a" marker-end="url(#a2)"/>
+    <line x1="165" y1="175" x2="218" y2="150" stroke="#57606a" marker-end="url(#a2)" stroke-dasharray="4 3"/>
+    <text x="168" y="155" font-size="9" fill="#57606a">poll</text>
+    <line x1="450" y1="120" x2="488" y2="118" stroke="#57606a" marker-end="url(#a2)"/>
+    <line x1="450" y1="230" x2="488" y2="240" stroke="#57606a" marker-end="url(#a2)"/>
+  </svg>
+  <figcaption>Fig. 6 — Ambientes DEV, UAT y PROD. Jenkins crea los contenedores de la aplicación usando el Docker del host.</figcaption>
+  </figure>
+  <p>Los “ambientes simulados” son <b>contenedores Docker</b> independientes, con puerto, variables (<code>APP_ENV</code>) y volumen
+  de datos propios. Jenkins, UAT y PROD comparten la red <code>rps-net</code>. Así los smoke tests llaman a
+  <code>http://rps-uat:8090</code> por nombre, y el usuario accede por <code>localhost:8081/8082</code>.
+  La interfaz muestra siempre un badge con el ambiente, la versión (<code>1.0.&lt;build&gt;</code>) y el commit: así se distingue
+  a simple vista qué versión corre en cada lugar.</p>
+</section>
+
+<!-- ===================== PIPELINE ===================== -->
+<section class="pagebreak">
+  <h2>4. Pipeline de CI/CD</h2>
+  <figure>
+  <svg viewBox="0 0 760 150" xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Sans, Arial" font-size="11">
+    <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#57606a"/></marker></defs>
+    <rect width="760" height="150" fill="#fff"/>
+    <g>
+      <rect x="8" y="40" width="72" height="44" rx="6" fill="#eef6ff" stroke="#3e63dd"/><text x="44" y="66" text-anchor="middle">Checkout</text>
+      <rect x="92" y="40" width="64" height="44" rx="6" fill="#eef6ff" stroke="#3e63dd"/><text x="124" y="66" text-anchor="middle">Build</text>
+      <rect x="168" y="40" width="78" height="44" rx="6" fill="#eef6ff" stroke="#3e63dd"/><text x="207" y="60" text-anchor="middle">Pruebas</text><text x="207" y="75" text-anchor="middle">unitarias</text>
+      <rect x="258" y="40" width="88" height="44" rx="6" fill="#eef6ff" stroke="#3e63dd"/><text x="302" y="60" text-anchor="middle">Pruebas de</text><text x="302" y="75" text-anchor="middle">integración</text>
+      <rect x="358" y="40" width="70" height="44" rx="6" fill="#eef6ff" stroke="#3e63dd"/><text x="393" y="60" text-anchor="middle">Imagen</text><text x="393" y="75" text-anchor="middle">Docker</text>
+      <rect x="440" y="40" width="80" height="44" rx="6" fill="#fff8e1" stroke="#f5a700"/><text x="480" y="60" text-anchor="middle">Deploy UAT</text><text x="480" y="75" text-anchor="middle">+ smoke</text>
+      <rect x="532" y="34" width="96" height="56" rx="6" fill="#fff1f0" stroke="#cf222e" stroke-width="2"/><text x="580" y="56" text-anchor="middle" font-weight="bold">⏸ Aprobación</text><text x="580" y="72" text-anchor="middle">QA (input)</text>
+      <rect x="640" y="40" width="112" height="44" rx="6" fill="#e9f8ef" stroke="#30a46c"/><text x="696" y="60" text-anchor="middle">Deploy PROD</text><text x="696" y="75" text-anchor="middle">+ smoke / rollback</text>
+      <g stroke="#57606a" marker-end="url(#a3)">
+        <line x1="80" y1="62" x2="90" y2="62"/><line x1="156" y1="62" x2="166" y2="62"/><line x1="246" y1="62" x2="256" y2="62"/>
+        <line x1="346" y1="62" x2="356" y2="62"/><line x1="428" y1="62" x2="438" y2="62"/><line x1="520" y1="62" x2="530" y2="62"/><line x1="628" y1="62" x2="638" y2="62"/>
+      </g>
+      <text x="207" y="110" text-anchor="middle" fill="#cf222e" font-size="10">falla → FAILURE,</text>
+      <text x="207" y="124" text-anchor="middle" fill="#cf222e" font-size="10">no se despliega</text>
+      <text x="480" y="110" text-anchor="middle" fill="#cf222e" font-size="10">smoke falla →</text>
+      <text x="480" y="124" text-anchor="middle" fill="#cf222e" font-size="10">rollback UAT</text>
+      <text x="580" y="110" text-anchor="middle" fill="#9a6700" font-size="10">Rechazar → UNSTABLE</text>
+      <text x="580" y="124" text-anchor="middle" fill="#9a6700" font-size="10">PROD intacto</text>
+      <text x="696" y="110" text-anchor="middle" fill="#cf222e" font-size="10">smoke falla →</text>
+      <text x="696" y="124" text-anchor="middle" fill="#cf222e" font-size="10">rollback automático</text>
+      <text x="8" y="22" fill="#57606a">Disparadores: githubPush() (webhook) · pollSCM('H/2 * * * *') (respaldo)</text>
+    </g>
+  </svg>
+  <figcaption>Fig. 7 — Etapas del pipeline declarativo y su comportamiento ante fallos.</figcaption>
+  </figure>
+
+  <table>
+    <tr><th style="width:20%">Etapa</th><th>Qué hace</th></tr>
+    <tr><td>Checkout</td><td>Obtiene el commit, calcula la versión <code>1.0.${BUILD_NUMBER}</code> y renombra el build con versión y commit. Da permisos de ejecución a <code>mvnw</code> y a los scripts (necesario si se commitean desde Windows).</td></tr>
+    <tr><td>Build</td><td><code>./mvnw -B -ntp clean package -DskipTests</code>: compila los 3 módulos en orden (reactor de Maven).</td></tr>
+    <tr><td>Pruebas unitarias</td><td><code>./mvnw test</code> (Surefire). Publica los reportes JUnit en Jenkins, con tendencia de pruebas por build.</td></tr>
+    <tr><td>Pruebas de integración</td><td><code>./mvnw verify -DskipUTs=true</code> (Failsafe ejecuta las clases <code>*IT</code>: levantan Spring Boot completo en puerto aleatorio, con H2 y WebSocket reales). Archiva el JAR con <i>fingerprint</i>.</td></tr>
+    <tr><td>Imagen Docker</td><td><code>docker build</code> con <code>APP_VERSION</code> y <code>APP_COMMIT</code> horneados en la imagen <code>rps3d:1.0.N</code>.</td></tr>
+    <tr><td>Deploy UAT</td><td><code>scripts/deploy.sh uat</code>: guarda la versión actual como <code>uat-previous</code>, reemplaza el contenedor y ejecuta <code>scripts/smoke-test.sh</code>, que verifica health, ambiente, versión, frontend y una ronda real. Si falla, hace rollback de UAT.</td></tr>
+    <tr><td>Aprobación QA (UAT)</td><td>Paso <code>input</code> con decisión (<i>Aprobar / Rechazar</i>), notas de QA y registro del usuario que decidió (<code>submitterParameter</code>). Timeout de 2 h. Ver sección 7.</td></tr>
+    <tr><td>Deploy Producción</td><td>Solo si se aprobó (<code>when</code>). Despliega <b>la misma imagen</b> en <code>rps-prod</code> y ejecuta el smoke test. Si falla, se dispara el <b>rollback automático</b> a <code>prod-previous</code>.</td></tr>
+  </table>
+  <p>Opciones globales: <code>disableConcurrentBuilds()</code> (evita que dos builds pisen el mismo ambiente),
+  <code>timestamps()</code>, retención de 20 builds y timeout global de 4 h. Los bloques <code>post</code> informan el
+  resultado: éxito, fallo, rechazo en UAT (UNSTABLE) o aborto.</p>
+  <div class="note">El job lo crea automáticamente <b>Job DSL</b> al arrancar Jenkins, con los triggers ya registrados.
+  Si se creara a mano, los <code>triggers</code> del <code>Jenkinsfile</code> recién quedan activos después de la primera
+  ejecución (ver sección 9).</div>
+
+  <h2>5. Estrategia de pruebas</h2>
+  <table>
+    <tr><th>Nivel</th><th>Clases</th><th>Cant.</th><th>Qué valida</th></tr>
+    <tr><td rowspan="3">Unitarias (Surefire)</td><td><code>GameRulesTest</code>, <code>MoveTest</code>, <code>RandomOpponentTest</code>, <code>ScoreboardTest</code></td><td>34</td><td>Las 9 combinaciones, la simetría de resultados, el parseo en español/inglés, la distribución uniforme con semilla fija y el marcador.</td></tr>
+    <tr><td><code>RoomManagerTest</code>, <code>RandomRoomCodeGeneratorTest</code>, <code>ColorAssignerTest</code>, <code>PlayerNamesTest</code></td><td>30</td><td>Crear/unirse/sala llena/inexistente, nombres repetidos, colores siempre distintos (200 salas), colisión de códigos con reintento, rondas, empates, salir y limpieza.</td></tr>
+    <tr><td><code>PveServiceTest</code>, <code>PveControllerTest</code></td><td>10</td><td>Servicio PvE con CPU determinista e historial mockeado. Capa HTTP aislada (<code>@WebMvcTest</code>) con validaciones y códigos 400/404.</td></tr>
+    <tr><td rowspan="4">Integración (Failsafe)</td><td><code>PveApiIT</code></td><td>2</td><td>HTTP real → controlador → servicio → core → H2: partida de 5 rondas, marcador consistente, historial persistido, fin de sesión.</td></tr>
+    <tr><td><code>PvpWebSocketIT</code></td><td>3</td><td>Dos clientes WebSocket reales: crear sala, unirse, que la jugada no se revele antes de tiempo, ganador, empate, abandono y cierre del navegador.</td></tr>
+    <tr><td><code>MatchRecordRepositoryIT</code></td><td>1</td><td>Persistencia JPA y orden del historial.</td></tr>
+    <tr><td><code>ApplicationSmokeIT</code></td><td>3</td><td>Arranque completo: health UP, <code>/api/info</code>, frontend 3D y Three.js servidos.</td></tr>
+    <tr><td>Smoke (post-deploy)</td><td><code>scripts/smoke-test.sh</code></td><td>—</td><td>Sobre el contenedor desplegado: health, ambiente/versión esperados, HTML y una ronda PvE real.</td></tr>
+  </table>
+</section>
+
+<!-- ===================== DECISIONES ===================== -->
+<section>
+  <h2>6. Decisiones técnicas y justificación</h2>
+  <table>
+    <tr><th style="width:24%">Decisión</th><th>Justificación</th></tr>
+    <tr><td>Juego de Piedra, Papel o Tijera</td><td>Reglas simples y totalmente testeables, que igual permiten tres módulos con responsabilidades reales (reglas, salas multijugador concurrentes y web/persistencia). Un cambio de una línea en las reglas rompe pruebas: ideal para el caso 2 de la demo.</td></tr>
+    <tr><td>Java 21 + Spring Boot 3.5 (Maven multimódulo)</td><td>Requisito de la consigna (Java + Spring). Java 21 es LTS. Spring Boot 3.5 es una línea madura y muy documentada. El reactor de Maven compila y prueba los módulos en orden de dependencias.</td></tr>
+    <tr><td><code>game-core</code> y <code>rooms</code> sin Spring</td><td>Lógica pura, rápida de probar (milisegundos) y sin acoplamiento al framework. <code>web</code> los integra como beans (<code>GameConfig</code>). Los generadores aleatorios son inyectables para tener pruebas deterministas.</td></tr>
+    <tr><td>REST para PvE, WebSocket “crudo” para PvP</td><td>El PvE es pedido-respuesta, y REST lo hace fácil de probar y de usar en el smoke test. El PvP necesita push del servidor: se eligió WebSocket con mensajes JSON propios (sin STOMP) para no agregar una librería cliente y controlar el protocolo.</td></tr>
+    <tr><td>Persistencia: H2 en archivo + JPA</td><td>La consigna deja libre la persistencia. H2 embebida evita levantar otro servicio. Cada ambiente tiene su volumen Docker (<code>rps-data-uat</code>, <code>rps-data-prod</code>). En las pruebas se usa H2 en memoria.</td></tr>
+    <tr><td>Three.js con modelado procedural</td><td>No requiere assets externos con licencias ni un pipeline de modelado: la oficina se genera con primitivas, texturas en canvas y un PRNG con semilla (se ve igual siempre). Three.js se sirve localmente (<code>/vendor</code>): funciona sin internet en la demo.</td></tr>
+    <tr><td>Manos articuladas (3 falanges por dedo) con poses interpolables</td><td>Permite animar el ritmo y transicionar a cada jugada con <i>easing</i>. El contorno estilo caricatura se logra con un casco invertido en el shader (similar a la imagen de referencia).</td></tr>
+    <tr><td>Jenkins en Docker + JCasC + Job DSL</td><td>Infraestructura como código: usuarios, seguridad, credenciales y job versionados. Cualquiera de los 3 integrantes levanta el mismo Jenkins con un comando, sin pasos manuales en la UI.</td></tr>
+    <tr><td>Docker como ambientes UAT/PROD</td><td>Aislamiento real (puerto, variables, datos), idéntico en Windows y macOS (Docker Desktop) y fácil de reiniciar o hacer rollback cambiando la imagen.</td></tr>
+    <tr><td>Promoción de la misma imagen</td><td>Lo que QA aprueba en UAT es exactamente lo que llega a producción (no se recompila). La versión y el commit van dentro de la imagen.</td></tr>
+    <tr><td>Socket de Docker montado (DooD)</td><td>Más simple y liviano que Docker-in-Docker. Riesgo: Jenkins tiene control del Docker del host. Es aceptable en un entorno local de curso, y se documenta.</td></tr>
+    <tr><td>Webhook vía ngrok + polling de respaldo</td><td>Jenkins corre en una PC sin IP pública. ngrok expone <code>/github-webhook/</code> por HTTPS. Si el túnel cae en la demo, el <code>pollSCM</code> garantiza el disparo en ≤ 2 min.</td></tr>
+    <tr><td>Maven Wrapper (<code>mvnw</code>)</td><td>Jenkins y los integrantes usan exactamente Maven 3.9.11 sin instalarlo.</td></tr>
+    <tr><td>Aprobación con decisión explícita (no solo “Proceed/Abort”)</td><td>Un rechazo deja trazabilidad: quién, cuándo, por qué (<code>uat-rechazo.txt</code> archivado) y estado UNSTABLE, distinto de un fallo técnico (FAILURE).</td></tr>
+  </table>
+</section>
+
+<!-- ===================== UAT ===================== -->
+<section class="pagebreak">
+  <h2>7. Anexo: ambiente UAT y aprobación manual</h2>
+  <p>Además de DEV (máquina del desarrollador) y PROD, se simula un ambiente de <b>pruebas de aceptación de usuario
+  (UAT)</b> en el contenedor <code>rps-uat</code> (puerto 8081, badge naranja). Cada versión que pasa las pruebas
+  automáticas se instala primero en UAT. El pipeline <b>se detiene</b> en la etapa <i>Aprobación QA (UAT)</i> hasta que
+  una persona decida desde Jenkins.</p>
+
+  <h3>7.1 Flujo normal (pruebas manuales satisfactorias)</h3>
+  <ol>
+    <li>QA abre http://localhost:8081 y ejecuta los casos de aceptación: menú y cámara, partida contra la CPU, sala PvP
+      con dos navegadores (códigos, colores, marcador, abandonar) e historial.</li>
+    <li>En Jenkins, sobre la etapa en pausa (o en <code>/job/piedra-papel-tijera-3d/lastBuild/input/</code>), elige
+      <b>Aprobar</b>, describe lo probado y presiona <b>Enviar decisión</b>.</li>
+    <li>El pipeline despliega la misma imagen en PROD, corre el smoke test y marca el build con
+      “En PRODUCCIÓN — aprobada por qa”.</li>
+  </ol>
+
+  <h3>7.2 Simulación de un error encontrado en UAT</h3>
+  <p>Se simula un defecto que las pruebas automáticas <b>no</b> detectan: en <code>index.html</code>, el botón de Piedra
+  muestra el texto “Papel”. El pipeline pasa todas las pruebas y despliega en UAT. Durante la prueba manual, QA lo detecta.</p>
+  <ol>
+    <li>QA elige <b>Rechazar</b> con la nota “Botón Piedra muestra texto Papel”.</li>
+    <li>El pipeline: (a) archiva <code>uat-rechazo.txt</code> con versión, commit, autor, quién rechazó y notas;
+      (b) marca el build como <b>UNSTABLE</b> con la descripción del rechazo; (c) <b>omite</b> el deploy a producción.</li>
+    <li>Producción sigue con la última versión aprobada. Se verificó con <code>scripts/status.sh</code>:
+<pre><code>uat   {"env":"UAT","version":"1.0.3","commit":"b13b647",...}
+prod  {"env":"PROD","version":"1.0.1","commit":"b13b647",...}</code></pre></li>
+  </ol>
+  <h3>7.3 Acciones a tomar ante un error en UAT</h3>
+  <table>
+    <tr><th style="width:6%">#</th><th>Acción</th><th style="width:22%">Responsable</th></tr>
+    <tr><td>1</td><td>Rechazar en Jenkins con una descripción reproducible (pasos, resultado esperado y obtenido).</td><td>QA</td></tr>
+    <tr><td>2</td><td>Abrir un <i>issue</i> en GitHub con la versión (<code>1.0.N</code>), el commit y el link al build rechazado.</td><td>QA / líder</td></tr>
+    <tr><td>3</td><td>Evaluar el impacto en UAT: si bloquea otras pruebas, <code>scripts/rollback.sh uat</code> restaura la versión anterior. Si no, se deja para reproducir el error.</td><td>Desarrollo</td></tr>
+    <tr><td>4</td><td>Corregir en una rama <code>fix/…</code>, agregar una prueba automática que cubra el caso cuando sea posible, y abrir un PR con revisión de otro integrante.</td><td>Desarrollo</td></tr>
+    <tr><td>5</td><td>Merge a <code>main</code>: nuevo pipeline → nueva versión en UAT → QA vuelve a probar el caso y una regresión básica.</td><td>Pipeline / QA</td></tr>
+    <tr><td>6</td><td>Con la aprobación, la versión corregida pasa a producción. El issue se cierra referenciando el build.</td><td>QA</td></tr>
+  </table>
+  <p>Además, si una versión aprobada fallara el smoke test en producción, el pipeline ejecuta automáticamente
+  <code>scripts/rollback.sh prod</code>. También existe la opción de rollback manual (ver instructivo).
+  El rollback de UAT se probó: UAT volvió de 1.0.3 a 1.0.1 en segundos.</p>
+</section>
+
+<!-- ===================== INSTRUCTIVO ===================== -->
+<section>
+  <h2>8. Instructivo de ejecución</h2>
+  <p>La guía detallada, con la tabla de problemas frecuentes, está en <code>docs/JENKINS_SETUP.md</code>. El guion de la
+  defensa está en <code>docs/DEMO.md</code>.</p>
+  <h3>8.1 Requisitos</h3>
+  <ul><li>Docker Desktop (Windows/macOS) o Docker Engine (Linux), Git, cuenta de GitHub y cuenta gratuita de ngrok.</li>
+  <li>JDK 21 solo para desarrollo local (Maven viene con <code>mvnw</code>).</li></ul>
+  <h3>8.2 Desarrollo local (DEV)</h3>
+<pre><code># macOS / Linux
+./mvnw clean verify           # 74 unitarias + 9 de integración
+./scripts/run-local.sh        # http://localhost:8090
+
+# Windows (PowerShell)
+.\mvnw.cmd clean verify
+.\scripts\run-local.ps1</code></pre>
+  <h3>8.3 Jenkins en Docker</h3>
+<pre><code># 1. Variables (repo, contraseñas, token de ngrok)
+cp jenkins/.env.example jenkins/.env                 # Windows: Copy-Item jenkins\.env.example jenkins\.env
+
+# 2. Levantar Jenkins + túnel ngrok
+./scripts/setup-jenkins.sh --tunnel                  # Windows: .\scripts\setup-jenkins.ps1 -Tunnel
+#    equivalente: docker compose -f jenkins/docker-compose.yml --profile tunnel up -d --build
+
+# 3. Abrir http://localhost:8080 (usuario admin / qa definidos en .env)
+#    URL pública del túnel: http://localhost:4040</code></pre>
+  <h3>8.4 Webhook de GitHub</h3>
+  <p>Repositorio → Settings → Webhooks → <i>Add webhook</i>. Payload URL
+  <code>https://&lt;dominio-ngrok&gt;/github-webhook/</code> (con la barra final), Content type <code>application/json</code>,
+  evento <i>push</i>. Con GitHub CLI:</p>
+<pre><code>gh api repos/OWNER/piedra-papel-tijera-3d/hooks -f name=web -F active=true -f 'events[]=push' \
+  -f 'config[url]=https://&lt;dominio-ngrok&gt;/github-webhook/' -f 'config[content_type]=json'</code></pre>
+  <h3>8.5 Uso del pipeline</h3>
+  <ol>
+    <li><code>git push</code> a <code>main</code> → el job <code>piedra-papel-tijera-3d</code> arranca solo.</li>
+    <li>Al pausar en <i>Aprobación QA</i>: probar http://localhost:8081 y decidir en Jenkins.</li>
+    <li>Producción: http://localhost:8082. Estado de ambientes: <code>./scripts/status.sh</code> o <code>.\scripts\status.ps1</code>.</li>
+    <li>Rollback manual de producción: <code>.\scripts\rollback.ps1 prod</code> (Windows) o
+      <code>docker exec rps-jenkins bash -c "cd /var/jenkins_home/workspace/piedra-papel-tijera-3d &amp;&amp; scripts/rollback.sh prod"</code>.</li>
+  </ol>
+  <h3>8.6 Casos de la defensa</h3>
+  <ul>
+    <li><b>Caso 1 (éxito):</b> cambiar el subtítulo del menú, hacer push, ver UAT actualizado, aprobar y ver PROD actualizado.</li>
+    <li><b>Caso 2 (fallo):</b> en <code>Move.java</code> cambiar <code>case PAPER -&gt; other == ROCK</code> por
+      <code>other == SCISSORS</code>. Fallan 5 pruebas de <code>GameRulesTest</code>, el pipeline se detiene en
+      “Pruebas unitarias” y no se despliega nada. Se procede con <code>git revert</code> y push.</li>
+  </ul>
+</section>
+
+<!-- ===================== ERRORES ===================== -->
+<section class="pagebreak">
+  <h2>9. Errores encontrados y solución</h2>
+  <p>Durante el desarrollo, el pipeline se ejecutó etapa por etapa (los mismos comandos <code>sh</code> del
+  <code>Jenkinsfile</code>) dentro de la imagen <code>jenkins/jenkins:lts-jdk21</code>, con acceso al Docker del host:
+  build, 83 pruebas, imagen, deploy y smoke test en UAT y PROD, caso 2 y rollback.
+  <span class="tag obs">Observado</span> marca problemas que ocurrieron efectivamente.
+  <span class="tag prev">Prevenido</span> marca problemas conocidos de este tipo de setup, que se resolvieron en el diseño antes de que aparecieran.</p>
+  <table>
+    <tr><th style="width:4%">#</th><th style="width:27%">Error / síntoma</th><th style="width:27%">Causa</th><th>Solución</th></tr>
+    <tr><td>1</td><td><span class="tag obs">Observado</span> <code>-DskipTests</code> en la etapa Build igual ejecutaba las pruebas unitarias.</td>
+      <td>En el POM padre, Surefire tenía <code>&lt;skipTests&gt;${skipUTs}&lt;/skipTests&gt;</code>. Un valor explícito en la configuración pisa la propiedad de línea de comandos.</td>
+      <td>Usar <code>&lt;skip&gt;${skipUTs}&lt;/skip&gt;</code>. Así <code>-DskipTests</code> (Build) y <code>-DskipUTs=true</code> (etapa de integración) funcionan de forma independiente.</td></tr>
+    <tr><td>2</td><td><span class="tag obs">Observado</span> Caso 2: <code>GameRulesTest</code> con 5 fallas
+      (<code>resultIsSymmetric</code> y combinaciones 4 y 5).</td>
+      <td>Bug intencional en <code>Move.beats</code>: papel le ganaba a tijera.</td>
+      <td>El pipeline se detuvo en “Pruebas unitarias”, sin imagen ni deploy. UAT y PROD siguieron en 1.0.1. Se resolvió con <code>git revert</code> + push.</td></tr>
+    <tr><td>3</td><td><span class="tag obs">Observado</span> Al construir la imagen de Jenkins, <code>apt-get install docker-ce-cli</code> falló (<code>403</code> al acceder a <code>deb.debian.org</code>).</td>
+      <td>La instalación por apt depende de repositorios externos y de la red (proxy/firewall de la red donde se construye).</td>
+      <td>Build multi-etapa: <code>COPY --from=docker:29-cli /usr/local/bin/docker</code>. Es un binario estático, sin apt, con un build más rápido y reproducible.</td></tr>
+    <tr><td>4</td><td><span class="tag obs">Observado</span> <code>mvnw -pl web -am spring-boot:run</code> fallaba en los módulos <code>game-core</code> / <code>rooms</code>.</td>
+      <td>Con <code>-am</code>, el goal <code>spring-boot:run</code> se ejecuta en todos los módulos, y los de librería no tienen clase <code>main</code>.</td>
+      <td><code>scripts/run-local.*</code> primero hace <code>install</code> y después <code>-pl web spring-boot:run</code>.</td></tr>
+    <tr><td>5</td><td><span class="tag obs">Observado</span> En una prueba E2E con dos navegadores, el marcador no se actualizaba a tiempo y la animación quedaba “colgada”.</td>
+      <td>El delta de tiempo por cuadro tenía un tope de 0,05 s. Con pocos FPS (render por software), la animación duraba varias veces más en un cliente que en otro.</td>
+      <td>Se subió el tope a 0,2 s: la animación dura lo mismo en equipos lentos y los dos jugadores ven el resultado sincronizado. Se re-ejecutó la prueba E2E: marcador 1-0 / 0-1 correcto.</td></tr>
+    <tr><td>6</td><td><span class="tag obs">Observado</span> Advertencia en las pruebas: “Mockito is currently self-attaching… Dynamic loading of agents will be disallowed”.</td>
+      <td>JDK 21 advierte cuando un agente (byte-buddy de Mockito) se carga en tiempo de ejecución.</td>
+      <td><code>&lt;argLine&gt;-XX:+EnableDynamicAgentLoading -Xshare:off&lt;/argLine&gt;</code> en Surefire y Failsafe.</td></tr>
+    <tr><td>7</td><td><span class="tag obs">Observado</span> Los smoke tests no alcanzaban la app cuando Jenkins corría con otra configuración de red.</td>
+      <td>Dentro de un contenedor, <code>localhost</code> es el propio contenedor. Según cómo corra Jenkins (red <code>rps-net</code> o red del host), la URL correcta cambia.</td>
+      <td>Red Docker compartida <code>rps-net</code>, con nombres <code>rps-uat</code>/<code>rps-prod</code> por defecto, y URLs configurables con <code>RPS_UAT_URL</code>/<code>RPS_PROD_URL</code>.</td></tr>
+    <tr><td>8</td><td><span class="tag prev">Prevenido</span> <code>permission denied</code> en <code>/var/run/docker.sock</code>.</td>
+      <td>La imagen oficial corre como usuario <code>jenkins</code>, y en Docker Desktop el socket pertenece a root.</td>
+      <td><code>user: root</code> en <code>docker-compose.yml</code> (riesgo aceptado y documentado en un entorno local).</td></tr>
+    <tr><td>9</td><td><span class="tag prev">Prevenido</span> <code>/usr/bin/env: 'bash\r'</code> y <code>./mvnw: Permission denied</code> al clonar o commitear desde Windows.</td>
+      <td>Fin de línea CRLF y pérdida del bit de ejecución en NTFS.</td>
+      <td><code>.gitattributes</code> fuerza LF en <code>*.sh</code>, <code>Jenkinsfile</code> y <code>Dockerfile</code>. La etapa Checkout ejecuta <code>chmod +x mvnw scripts/*.sh</code>.</td></tr>
+    <tr><td>10</td><td><span class="tag prev">Prevenido</span> El push no dispara el job hasta haberlo ejecutado una vez a mano.</td>
+      <td>Los <code>triggers</code> de un <code>Jenkinsfile</code> se registran recién en la primera ejecución.</td>
+      <td>El job se crea por Job DSL con <code>githubPush()</code> y <code>pollSCM</code> ya configurados.</td></tr>
+    <tr><td>11</td><td><span class="tag prev">Prevenido</span> El webhook responde 302/403.</td>
+      <td>Payload URL sin la barra final (<code>/github-webhook</code>).</td>
+      <td>Documentar la URL exacta con barra final y verificar en <i>Recent Deliveries</i> (respuesta 200).</td></tr>
+  </table>
+  <h3>9.1 Registro de fallos al ejecutar en los equipos del grupo</h3>
+  <p><i>[Completar con los fallos que aparezcan al correr el pipeline en sus equipos, por ejemplo con capturas de la
+  Stage View de Jenkins (build en verde, en rojo y pausado en la aprobación).]</i></p>
+  <table>
+    <tr><th style="width:4%">#</th><th>Build / etapa</th><th>Síntoma (log)</th><th>Causa</th><th>Solución</th></tr>
+    <tr><td>12</td><td>&nbsp;</td><td></td><td></td><td></td></tr>
+    <tr><td>13</td><td>&nbsp;</td><td></td><td></td><td></td></tr>
+  </table>
+</section>
+
+<!-- ===================== CONCLUSIONES ===================== -->
+<section class="pagebreak">
+  <h2>10. Conclusiones y dificultades</h2>
+  <h3>Conclusiones</h3>
+  <ul>
+    <li>Tener el pipeline como código (<code>Jenkinsfile</code>) y la configuración de Jenkins como código (JCasC + Job DSL)
+      hizo que el proceso sea reproducible, revisable en PRs y versionado junto a la aplicación.</li>
+    <li>Separar pruebas unitarias (rápidas, sin Spring) de pruebas de integración (Spring Boot completo, WebSocket y base
+      reales) da feedback temprano y, a la vez, confianza en la integración entre módulos. El caso 2 lo mostró: un error
+      de una línea se detectó en segundos y bloqueó todo despliegue.</li>
+    <li>El ambiente UAT con aprobación manual agrega una barrera que las pruebas automáticas no cubren (por ejemplo,
+      errores visuales). Registrar quién aprobó o rechazó, y por qué, da trazabilidad.</li>
+    <li>Promover la misma imagen Docker entre ambientes, con la versión y el commit visibles en la UI, elimina la duda de
+      “qué está corriendo dónde”. Además, permite un rollback inmediato.</li>
+  </ul>
+  <h3>Dificultades</h3>
+  <ul>
+    <li><b>Webhooks hacia una PC local:</b> GitHub no puede llegar a <code>localhost</code>. Se resolvió con ngrok,
+      dejando polling como plan B.</li>
+    <li><b>Docker dentro de Jenkins:</b> permisos del socket, redes (<code>localhost</code> no es el host) y dependencias
+      de red al construir la imagen.</li>
+    <li><b>Configuración de Maven:</b> la interacción entre <code>skipTests</code>, Surefire y Failsafe no es obvia. Hubo que
+      leer cómo la configuración explícita pisa las propiedades.</li>
+    <li><b>Animación 3D:</b> lograr que las manos se lean bien (anatomía del pulgar, orientación de la muñeca, ángulo de
+      cámara) llevó varias iteraciones con capturas automáticas (Playwright), y hubo que considerar equipos con pocos FPS.</li>
+    <li><b>Concurrencia en PvP:</b> varias conexiones modifican la misma sala. Se resolvió sincronizando
+      <code>RoomManager</code> y usando <code>ConcurrentWebSocketSessionDecorator</code> para los envíos.</li>
+  </ul>
+
+  <h2>11. Apéndice: estructura del repositorio</h2>
+<pre><code>piedra-papel-tijera-3d/
+├── pom.xml                      POM padre (módulos, Surefire/Failsafe, skipUTs/skipITs)
+├── mvnw, mvnw.cmd, .mvn/        Maven Wrapper 3.9.11
+├── Jenkinsfile                  Pipeline declarativo
+├── Dockerfile, .dockerignore    Imagen de la aplicación
+├── game-core/                   Reglas, oponente, marcador         (+ 34 pruebas)
+├── rooms/                       Salas PvP                          (+ 30 pruebas)
+├── web/                         Spring Boot + frontend 3D          (+ 10 unitarias, 9 IT)
+│   └── src/main/resources/static/  index.html, css/, js/ (main, stage, office, arms, net), vendor/three
+├── jenkins/                     Dockerfile, plugins.txt, casc.yaml, docker-compose.yml, .env.example
+├── scripts/                     deploy.sh, smoke-test.sh, rollback.sh (pipeline)
+│                                setup-jenkins, status, run-local, rollback (.sh y .ps1)
+└── docs/                        JENKINS_SETUP.md, DEMO.md, informe/, img/</code></pre>
+</section>
+</body>
+</html>

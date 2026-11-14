@@ -1,0 +1,43 @@
+# Jenkins + túnel ngrok (opcional) para recibir webhooks de GitHub.
+#   docker compose up -d --build                    -> solo Jenkins
+#   docker compose --profile tunnel up -d --build   -> Jenkins + ngrok
+name: rps-ci
+
+services:
+  jenkins:
+    build: .
+    image: rps-jenkins:lts
+    container_name: rps-jenkins
+    user: root
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file: .env
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - rps-net
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: rps-ngrok
+    profiles: ["tunnel"]
+    restart: unless-stopped
+    depends_on:
+      - jenkins
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    # Con dominio estático gratuito de ngrok: NGROK_EXTRA_ARGS=--url=https://tu-dominio.ngrok-free.app
+    command: http jenkins:8080 --log stdout ${NGROK_EXTRA_ARGS:-}
+    ports:
+      - "4040:4040"
+    networks:
+      - rps-net
+
+volumes:
+  jenkins_home:
+
+networks:
+  rps-net:
+    name: rps-net

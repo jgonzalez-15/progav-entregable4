@@ -1,0 +1,69 @@
+# Configuración de Jenkins como código (plugin configuration-as-code).
+# Los valores ${...} se leen de variables de entorno (archivo jenkins/.env).
+jenkins:
+  systemMessage: "CI/CD - Piedra, Papel o Tijera 3D (Programación Avanzada 2026)"
+  numExecutors: 2
+  mode: NORMAL
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID:-admin}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+        - id: "${JENKINS_QA_ID:-qa}"
+          password: "${JENKINS_QA_PASSWORD:-qa12345}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: true
+
+unclassified:
+  location:
+    url: "${JENKINS_URL:-http://localhost:8080/}"
+    adminAddress: "jenkins@localhost"
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: "github-token"
+              description: "Token de GitHub (solo necesario si el repo es privado)"
+              username: "${GITHUB_USER:-anonymous}"
+              password: "${GITHUB_TOKEN:-none}"
+
+jobs:
+  - script: |
+      def repo = System.getenv('REPO_URL') ?: 'https://github.com/OWNER/piedra-papel-tijera-3d.git'
+      def branch = System.getenv('REPO_BRANCH') ?: 'main'
+      def privateRepo = (System.getenv('GITHUB_TOKEN') ?: '').trim()
+      pipelineJob('piedra-papel-tijera-3d') {
+        description('Pipeline CI/CD: Build, pruebas, UAT, aprobación manual y Producción')
+        properties {
+          githubProjectUrl(repo.replaceAll(/\.git$/, ''))
+          pipelineTriggers {
+            triggers {
+              githubPush()
+              pollSCM { scmpoll_spec('H/2 * * * *') }
+            }
+          }
+        }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url(repo)
+                  if (privateRepo && privateRepo != 'none') { credentials('github-token') }
+                }
+                branch("*/${branch}")
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }
