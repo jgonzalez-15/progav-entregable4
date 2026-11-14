@@ -15,9 +15,6 @@ jenkins:
   authorizationStrategy:
     loggedInUsersCanDoAnything:
       allowAnonymousRead: false
-  crumbIssuer:
-    standard:
-      excludeClientIPFromCrumb: true
 
 unclassified:
   location:
@@ -38,7 +35,7 @@ credentials:
 jobs:
   - script: |
       def repo = System.getenv('REPO_URL') ?: 'https://github.com/OWNER/piedra-papel-tijera-3d.git'
-      def branch = System.getenv('REPO_BRANCH') ?: 'main'
+      def repoBranch = System.getenv('REPO_BRANCH') ?: 'main'
       def privateRepo = (System.getenv('GITHUB_TOKEN') ?: '').trim()
       pipelineJob('piedra-papel-tijera-3d') {
         description('Pipeline CI/CD: Build, pruebas, UAT, aprobación manual y Producción')
@@ -59,7 +56,7 @@ jobs:
                   url(repo)
                   if (privateRepo && privateRepo != 'none') { credentials('github-token') }
                 }
-                branch("*/${branch}")
+                branch('*/' + repoBranch)
               }
             }
             scriptPath('Jenkinsfile')
