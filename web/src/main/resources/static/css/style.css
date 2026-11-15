@@ -4,8 +4,8 @@
   --panel-border: rgba(255, 220, 180, 0.18);
   --text: #fff6ec;
   --muted: #d8c3ad;
-  --accent: #ff8a3d;
-  --accent-2: #ffb36b;
+  --accent: #38bdf8;
+  --accent-2: #7dd3fc;
   --danger: #e5484d;
   --ok: #30a46c;
   --radius: 16px;
@@ -53,12 +53,12 @@ input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255, 138, 
 
 .btn {
   font: inherit; font-weight: 600; cursor: pointer; color: var(--text);
-  background: rgba(255, 255, 255, 0.1); border: 1px solid var(--panel-border);
+  background: rgba(37, 99, 235, 0.35); border: 1px solid rgba(125, 211, 252, 0.5);
   border-radius: 10px; padding: 11px 16px; transition: transform .08s, background .2s;
 }
-.btn:hover { background: rgba(255, 255, 255, 0.18); }
+.btn:hover { background: rgba(37, 99, 235, 0.55); }
 .btn:active { transform: scale(0.97); }
-.btn.primary { background: linear-gradient(135deg, var(--accent), #f2643a); border-color: transparent; }
+.btn.primary { background: linear-gradient(135deg, #2563eb, #06b6d4); border-color: transparent; }
 .btn.primary:hover { filter: brightness(1.08); }
 .btn.danger { background: rgba(229, 72, 77, 0.2); border-color: rgba(229, 72, 77, 0.5); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -186,7 +186,7 @@ dialog form { text-align: right; }
 }
 
 /* ================= V2: competitivo, ranking, celebraciones ================= */
-.btn.ranked { background: linear-gradient(135deg, #f5c542, #e8891c); color: #241708; border-color: transparent; }
+.btn.ranked { background: linear-gradient(135deg, #06b6d4, #2563eb); color: #ffffff; border-color: transparent; }
 .btn.ranked:hover { filter: brightness(1.07); }
 .links { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
 .profile-line { text-align: center; margin: -2px 0 0; min-height: 1em; }
