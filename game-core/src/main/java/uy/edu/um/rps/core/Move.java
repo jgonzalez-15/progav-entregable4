@@ -22,7 +22,7 @@ public enum Move {
     public boolean beats(Move other) {
         return switch (this) {
             case ROCK -> other == SCISSORS;
-            case PAPER -> other == ROCK;
+            case PAPER -> other == SCISSORS;
             case SCISSORS -> other == PAPER;
         };
     }
